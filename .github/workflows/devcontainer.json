@@ -1,0 +1,223 @@
+Directory Structure
+
+Here’s a suggested directory structure for your project:
+
+open5gs/
+├── .devcontainer/
+│   ├── devcontainer.json
+│   └── Dockerfile
+├── .github/
+│   └── workflows/
+│       └── ci.yml
+├── src/
+│   ├── main.cpp
+│   └── utils.cpp
+├── include/
+│   └── utils.h
+├── tests/
+│   ├── test_main.cpp
+│   └── CMakeLists.txt
+├── CMakeLists.txt
+└── README.md
+
+1. .devcontainer/devcontainer.json
+
+This file configures the development container settings.
+
+{
+  "name": "Open5GS Dev Container",
+  "build": {
+    "dockerfile": "Dockerfile",
+    "context": ".."
+  },
+  "settings": {
+    "terminal.integrated.shell.linux": "/bin/bash"
+  },
+  "extensions": [
+    "ms-vscode.cpptools",
+    "ms-vscode.cmake-tools",
+    "ms-vscode.cmake-tools"
+  ],
+  "forwardPorts": [8080],
+  "postCreateCommand": "cmake . && make",
+  "onCreateCommand": "echo 'Container ready!'"
+}
+
+2. .devcontainer/Dockerfile
+
+This file defines the Docker image for your development container.
+
+# Use the official C++ development image
+FROM mcr.microsoft.com/vscode/devcontainers/cpp:0-ubuntu-20.04
+
+# Install additional packages if needed
+RUN apt-get update && \
+    apt-get install -y cmake git
+
+# Set the working directory
+WORKDIR /workspace
+
+3. .github/workflows/ci.yml
+
+This file configures Continuous Integration using GitHub Actions.
+
+name: C++ CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Setup CMake
+        uses: jwlawson/actions-setup-cmake@v1
+        with:
+          cmake-version: '3.19.0'
+
+      - name: Build
+        run: |
+          mkdir build
+          cd build
+          cmake ..
+          make
+
+      - name: Run Tests
+        run: |
+          cd build
+          ctest
+
+4. src/main.cpp
+
+This file is the main entry point of your application.
+
+#include <iostream>
+#include "utils.h"
+
+int main() {
+    std::cout << "Welcome to Open5GS!" << std::endl;
+    runUtilityFunction();
+    return 0;
+}
+
+5. src/utils.cpp
+
+This file contains utility functions.
+
+#include <iostream>
+#include "utils.h"
+
+void runUtilityFunction() {
+    std::cout << "Utility function executed!" << std::endl;
+}
+
+6. include/utils.h
+
+Header file for utility functions.
+
+#ifndef UTILS_H
+#define UTILS_H
+
+void runUtilityFunction();
+
+#endif // UTILS_H
+
+7. tests/test_main.cpp
+
+This file contains your test cases.
+
+#include <gtest/gtest.h>
+#include "utils.h"
+
+TEST(UtilsTest, RunUtilityFunction) {
+    EXPECT_NO_THROW(runUtilityFunction());
+}
+
+int main(int argc, char **argv) {
+    ::testing::InitGoogleTest(&argc, argv);
+    return RUN_ALL_TESTS();
+}
+
+8. tests/CMakeLists.txt
+
+CMake configuration for your tests.
+
+cmake_minimum_required(VERSION 3.10)
+project(Open5GSTests)
+
+enable_testing()
+
+add_executable(test_main test_main.cpp)
+target_link_libraries(test_main gtest gtest_main)
+add_test(NAME RunTests COMMAND test_main)
+
+9. CMakeLists.txt
+
+CMake configuration for your project.
+
+cmake_minimum_required(VERSION 3.10)
+project(Open5GS)
+
+set(CMAKE_CXX_STANDARD 11)
+
+include_directories(include)
+
+add_executable(open5gs src/main.cpp src/utils.cpp)
+
+enable_testing()
+add_subdirectory(tests)
+
+10. README.md
+
+A README file explaining your project.
+
+# Open5GS
+
+Open5GS is a C++ based project that provides functionalities for [describe what your project does].
+
+## Getting Started
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/jofthev/open5gs.git
+
+	2.	Build the project:
+
+cd open5gs
+mkdir build && cd build
+cmake ..
+make
+
+
+	3.	Run the application:
+
+./open5gs
+
+
+
+Running Tests
+
+To run the tests, execute:
+
+cd build
+ctest
+
+License
+
+This project is licensed under the MIT License.
+
+### Final Steps
+1. **Create the Directory Structure**: Make sure to create all the directories and files as described.
+2. **Commit Changes**: Once you have added all these files, commit your changes to the repository.
+3. **Push to GitHub**: Use `git push` to upload your changes to the `main` branch on GitHub.
+
+This setup should provide a solid foundation for your `open5gs` project, integrating development and CI/CD workflows. If you have specific features or configurations in mind, feel free to adjust the file contents accordingly!
